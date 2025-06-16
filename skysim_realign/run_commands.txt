@@ -1,0 +1,5 @@
+salloc -N 4 --qos interactive --time 01:00:00 --constraint cpu --account=m1727
+source /global/common/software/lsst/common/miniconda/setup_current_python.sh
+export OMP_NUM_THREADS=1
+export NUMEXPR_MAX_THREADS=1
+srun -n 32 python3 tidal_realign.py
