@@ -10,6 +10,7 @@ from modular_alignments.modular_alignment import project_alignments_with_NCP, ge
 from modular_alignments.modular_alignment_2d import tidal_angle
 from modular_alignments.modular_alignment import align_to_axis as align_to_axis_3d
 from modular_alignments.modular_alignment_2d import align_to_axis as align_to_axis_2d
+from modular_alignments.alignment_strengths import compound_sigmoid, color_strength_params
 
 # Get MPI stuff
 from mpi4py import MPI
@@ -179,7 +180,6 @@ if os.path.exists(full_f_name):
     with h5py.File(full_f_name, 'r') as f:
         skip &= ( f.attrs.get("MIN_MASS_THRESHOLD",-1) == MASS_THRESH )
         skip &= ( f.attrs.get("MAX_R_MAG",-1) == MAG_R_UPPER )
-        skip &= ( f.attrs.get("mu",-1) == mu )
         skip &= ( f.attrs.get("sparse", -1) == int(sparse_store) )
         skip &= z_range in f.keys()
 
@@ -193,7 +193,7 @@ else:
     # Just the minimum relevant columns to align to tidal fields in 2D
     table_columns = [ "redshiftHubble", "ra_true", "dec_true", "tidal_s_11", "tidal_s_12", "tidal_s_22",
                         "morphology/totalEllipticity", "morphology/totalEllipticity1", "morphology/totalEllipticity2", "galaxyID",
-                         "x", "y", "z", "baseDC2/target_halo_mass", "mag_true_r"
+                         "x", "y", "z", "baseDC2/target_halo_mass", "mag_true_r", "mag_true_g"
                     ]
     
     native_filters = [f'redshift_block_lower <= {REDSHIFT_BLOCK}']
@@ -246,6 +246,10 @@ else:
         base_e2 = data["morphology/totalEllipticity2"]
 
         print(f"{sum(mask)}/{len(data)} Entries satisfy thresholds", flush=True)
+
+        ##### CALCULATE MU FROM PROPERTIES ########################################
+        g_minus_r = data["mag_true_g"] - data["mag_true_r"]
+        mu = compound_sigmoid([g_minus_r], [color_strength_params])
         
         ##### PREPARE MAPPER FOR ALIGNMENT ########################################
         # These are the parameters I have found from iterative fitting
@@ -267,7 +271,8 @@ else:
         syy = data["tidal_s_22"][mask]
         redshift = data["redshiftHubble"][mask]
         tidal_phi = tidal_angle(sxx, syy, sxy, redshift)
-        aligned_phi = align_to_axis_2d(tidal_phi, mu, as_vector=False, custom_distr=dwvm)
+        mu = np.ones(len(data))*mu
+        aligned_phi = align_to_axis_2d(tidal_phi, mu[mask], as_vector=False, custom_distr=dwvm)
     
         # Realign shapes
         ellipticity = data["morphology/totalEllipticity"][mask]
@@ -276,13 +281,14 @@ else:
         if sparse_store:
             print("Sparse Table", flush=True)
             # Only store relevant columns
-            subset_table = Table({"galaxyID":data["galaxyID"][mask], "e1":e1, "e2":e2})
+            subset_table = Table({"galaxyID":data["galaxyID"][mask], "e1":e1, "e2":e2, "mu":mu[mask]})
         else:
             # Overwrite base e1, e2 with proper (leaving those that did not make the cut)
             base_e1[mask] = e1
             base_e2[mask] = e2
+            mu[~mask] = np.nan
             # Include just the rotated shapes as well as identifying info (galaxyID)
-            subset_table = Table({"galaxyID":data["galaxyID"], "e1":base_e1, "e2":base_e2})
+            subset_table = Table({"galaxyID":data["galaxyID"], "e1":base_e1, "e2":base_e2, "mu":mu})
             
         if REDSHIFT_MIN < 0:
             REDSHIFT_MIN = 0
@@ -295,7 +301,6 @@ else:
             with h5py.File(full_f_name, 'w') as f:
                 f.attrs["MIN_MASS_THRESHOLD"] = MASS_THRESH
                 f.attrs["MAX_R_MAG"] = MAG_R_UPPER
-                f.attrs["mu"] = mu
                 f.attrs["sparse"] = int(sparse_store)
                 if sparse_store:
                     f.attrs["description"] = "Only overwritten e1, e2 values stored."
