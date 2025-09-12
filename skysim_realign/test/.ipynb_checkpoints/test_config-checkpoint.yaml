@@ -1,0 +1,43 @@
+output_file: /pscratch/sd/v/vanalfen/skysim_realign/add_ons/ellipticity_add_on.h5
+native_filters:
+- redshift_block_lower <= 0
+filters:
+- redshiftHubble >= 0
+- redshiftHubble < 1
+- baseDC2/target_halo_mass > 1.846e13
+- mag_true_r_lsst < 24.5
+sparse_storage: true
+store_config: true
+downsample_fraction: 1.0
+extra_columns:
+- null
+alignment_strength:
+  criteria:
+  - null
+  alignment_method: tidal
+  alignment_strength_method: sigmoid
+  remap_3d: true
+  remap_tidal: true
+  constant:
+    alignment_strength: 0.9
+  custom:
+    custom_script: custom_scripts.py
+    alignment_strength: color_alignment(mag_true_r, mag_true_g)
+  sigmoid:
+    color:
+      x: 'lambda mag_true_r, mag_true_g: mag_true_g - mag_true_r'
+      x0: 4
+      k: -0.4
+      y_low: -0.2
+      y_high: 1.0
+      use_as: null
+    luminosity:
+      x: 'lambda mag_true_r, mag_true_g: mag_true_g - mag_true_r'
+      x0: -0.5
+      k: -1.5
+      y_low: -0.2
+      y_high: 1.0
+      use_as: null
+alignment_strength_complement:
+  use: false
+  criteria: null

@@ -149,8 +149,8 @@ cat = gcrc.load_catalog(cat_name,config_overwrite={'mpi_rank': rank, 'mpi_size':
 # Read catalog using filters
 # Filter thresholds
 REDSHIFT_BLOCK = 0
-REDSHIFT_MIN = -1
-REDSHIFT_MAX = 0.5
+REDSHIFT_MIN = 0.8
+REDSHIFT_MAX = 0.81
 # DEC_MIN = -36.61
 # DEC_MAX = 0.0
 # RA_MIN = 0.0
@@ -193,7 +193,7 @@ else:
     # Just the minimum relevant columns to align to tidal fields in 2D
     table_columns = [ "redshiftHubble", "ra_true", "dec_true", "tidal_s_11", "tidal_s_12", "tidal_s_22",
                         "morphology/totalEllipticity", "morphology/totalEllipticity1", "morphology/totalEllipticity2", "galaxyID",
-                         "x", "y", "z", "baseDC2/target_halo_mass", "mag_true_r", "mag_true_g"
+                         "x", "y", "z", "baseDC2/target_halo_mass", "mag_true_r", "mag_true_g", "hostHaloMass"
                     ]
     
     native_filters = [f'redshift_block_lower <= {REDSHIFT_BLOCK}']
@@ -202,9 +202,10 @@ else:
               # f"dec_true > {DEC_MIN}", f"dec_true < {DEC_MAX}",
               # f"ra_true > {RA_MIN}", f"ra_true < {RA_MAX}",
               #f"mag_true_r_lsst < {MAG_R_UPPER}",
-              #f"baseDC2/target_halo_mass > {MASS_THRESH}",
+              #"baseDC2/target_halo_mass > 1.846e13",
                ]
     catalog_data = cat.get_quantities( table_columns, filters=filters, native_filters = native_filters )
+    
             
     data_rank={}
     recvbuf={}

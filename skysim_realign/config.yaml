@@ -1,0 +1,106 @@
+output_file: "/pscratch/sd/v/vanalfen/skysim_realign/add_ons/multi_run_constant_ellipticity_add_on.h5"
+test: False
+overwrite_match: False
+native_filters:
+    - null
+filters:
+    - "mag_true_r_lsst < 24.5"
+    - "hostHaloMass > 7.25e12"      # same as baseDC2/target_halo_mass
+sparse_storage: true                  # true: store only realigned e1,e2. false: store all e1, e2
+downsample_fraction: 1.               # What fraction to keep [0,1] where 1.0 = no downsampling, 0.5 = randomly keep half, 0 = keep none
+extra_columns:                        # Extra columns to store in the output
+    # By default, store only [galaxyID, e1, e2, mu]. Add extras if you want to store more below
+    - null                            # Keep this line. Will not add a column, but will allow the config to read this section as legitimate
+    - "hostHaloMass"
+    - "morphology/totalEllipticity1"
+    - "morphology/totalEllipticity2"
+    - "x"
+    - "y"
+    - "z"
+    - "redshiftHubble"
+    - "baseDC2/target_halo_x"
+    - "baseDC2/target_halo_y"
+    - "baseDC2/target_halo_z"
+    - "baseDC2/target_halo_axis_A_x"
+    - "baseDC2/target_halo_axis_A_y"
+    - "baseDC2/target_halo_axis_A_z"
+iterations: 50
+
+alignment_strength:
+    # Criteria creates a mask and only applies alignment strengths to those satisfying the criteria given as lambdas
+    # With multiple criteria, each resulting mask will be ANDed together
+    # if null, this applies to ALL galaxies read in
+    criteria:
+        - null                        # Keep this line. Add extras below to add conditions
+        #- "lambda baseDC2/target_halo_mass: baseDC2/target_halo_mass > 1.846e13"
+    # alignment_method options: halo, tidal, sigmoid, custom
+    #    halo:       Align with respect to halo (uses major axis)
+    #    tidal:      Align with respect to tidal fields (uses tidal tensors)
+    #    Recommendation: use tidal and simply set remap_tidal to true (and remap_3D to true if assuming alignment calculated in 3D)
+    alignment_method: "tidal"
+    # alignment_strength_method options: constant, custom, sigmoid
+    #    constant:   A single number to use as the alignment strength for all
+    #    custom:     A function call of the form "func_name(arg1, arg2,...)"
+    #                    - func_name: the name of a custom function (in a separate script that will be imported using a parameter below)
+    #                    - arg1, arg2, ...: column names in the loaded catalog
+    #                Alternately, a lambda function "lambda arg1, arg2 : function_logic"
+    #                    - arg1, arg2: column names in the loaded table
+    #    sigmoid:    A series of "layers" (their names don't matter). Each with the parameters needed to define a sigmoid.
+    #                    The parameters will be either a value, or a lambda function accessing the table columns
+    alignment_strength_method: "constant"
+    # remap options:
+    # remap_3d - Take the single mu value and remap it to two mu values + a weight for 2d von Mises
+    # remap_tidal - Remap the given 3d mu to adjust to tidal equivalent
+    remap_3d: True
+    remap_tidal: True
+    constant:
+        # Only applies if constant method chosen
+        alignment_strength: 0.9    # Alignment strength
+    custom:
+        # Only applies if custom method chosen - set custom_script to null if using a lambda function for alignment strength
+        custom_script: "custom_scripts.py"               # python script containing functions to use to assign individual alignment strengths
+        alignment_strength: "color_alignment(mag_true_r, mag_true_g)"    # Calling the function with column names
+        # Alternatively, you could use a lambda. "lambda mag_true_r, mag_true_g: some_code..."
+    sigmoid:
+        # Only applies if sigmoid method chosen
+        # Give a series of sigmoid parameters (either numerical, special function, or columns)
+        # For each sigmoid, create a new indented category (name doesn't matter except for your understanding)
+        # Multiple sigmoids will build on each other (i.e. use the results of the previous as a parameter in the next)
+        # Example:
+        color:
+            # Sigmoid equation: y_low + (y_high - y_low) / (1 + exp[-k * [x - x0]])
+            x: "lambda mag_true_r, mag_true_g: mag_true_g - mag_true_r"
+            x0: 4
+            k: -0.4
+            y_low: -0.2
+            y_high: 1.
+            use_as: null            # If null, assume y_high. The parameter that these results will be used as in the following sigmoids
+        magnitude:
+            x: "lambda mag_true_r, mag_true_g: mag_true_g - mag_true_r"
+            x0: 28
+            k: -0.1
+            y_low: -0.2
+            y_high: 1.              # This will be overwritten since the last sigmoid results take its place
+            use_as: null
+            
+alignment_strength_complement:
+    # apply alignments to galaxies fulfilling other crietria
+    # e.g. in the case of bad halos, the alignment_Strength section will align high mass halos and this section can be used
+    # to align all galaxies in low mass halos differently, like w.r.t. tidal fields
+    # CAUTION: if criteria overlap, this will overwrite previously realigned e1,e2 since it comes last
+    use: false                     # Whether to use this section. if null, assume false
+    criteria:
+        - null                 # New criteria. If null, simply use the complement of the alignment_strength mask
+    # For all other sections, assume the same values as alignment_strength section where they are not explcitly given
+    # i.e. only include sections here that you wish to act differently than above. Otherwise, use the same settings as
+    # from the alignment_strength section
+    # Example usage:
+    # in alignment_strength, set criteria for above a given mass, align those galaxies with respect to halos, set remap_3D to true
+    # and remap_tidal to false, and whatever other settings we want. Here, set use to true, criteria to null (the complement), set
+    # remap_tidal to true, and leave out all other fields (to automatically inherit)
+    
+
+
+
+
+        
