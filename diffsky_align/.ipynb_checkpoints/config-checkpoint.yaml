@@ -1,4 +1,4 @@
-output_file: "/pscratch/sd/v/vanalfen/skysim_realign/add_ons/multi_run_constant_ellipticity_z_under_0.1336.h5"
+output_file: "/pscratch/sd/v/vanalfen/diffsky_realign/add_ons/multi_run_constant_ellipticity_z_under_0.1336.h5"
 test: False
 overwrite_match: False
 native_filters:

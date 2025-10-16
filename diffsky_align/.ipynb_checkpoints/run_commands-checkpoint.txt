@@ -1,0 +1,8 @@
+# salloc -N 4 --qos interactive --time 01:00:00 --constraint cpu --account=m1727
+salloc -N 1 --qos interactive --time 01:00:00 --constraint cpu --account=m1727
+# source /global/common/software/lsst/common/miniconda/setup_current_python.sh
+conda activate diffsky
+# export OMP_NUM_THREADS=1
+# export NUMEXPR_MAX_THREADS=1
+# srun -n 32 python3 diffsky_realign.py
+python3 diffsky_realign.py
