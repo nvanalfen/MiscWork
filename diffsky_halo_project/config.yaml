@@ -1,0 +1,7 @@
+main_dir: "/global/cfs/cdirs/hacc/OpenCosmo/LastJourney/synthetic_galaxies/"
+sim: "smdpl_dr1_latest"
+all_files: true
+mock_file: "lc_cores-121.diffsky_gals.hdf5"
+batch_size: 50000
+print_progress: true
+save_file: "projections.h5"

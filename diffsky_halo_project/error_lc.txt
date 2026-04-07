@@ -1,0 +1,13 @@
+
+
+>>>>> Error on file /global/cfs/cdirs/hacc/OpenCosmo/LastJourney/synthetic_galaxies/smdpl_dr1_latest/lc_cores-365.diffsky_gals.hdf5
+index 0 is out of bounds for axis 0 with size 0
+
+>>>>> Error on file /global/cfs/cdirs/hacc/OpenCosmo/LastJourney/synthetic_galaxies/smdpl_dr1_latest/lc_cores-365.diffsky_gals.hdf5
+index 0 is out of bounds for axis 0 with size 0
+
+>>>>> Error on file /global/cfs/cdirs/hacc/OpenCosmo/LastJourney/synthetic_galaxies/smdpl_dr1_latest/lc_cores-131.diffsky_gals.hdf5
+index 0 is out of bounds for axis 0 with size 0
+
+>>>>> Error on file /global/cfs/cdirs/hacc/OpenCosmo/LastJourney/synthetic_galaxies/smdpl_dr1_latest/lc_cores-224.diffsky_gals.hdf5
+index 0 is out of bounds for axis 0 with size 0

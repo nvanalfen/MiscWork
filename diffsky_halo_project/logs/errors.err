@@ -1,0 +1,3 @@
+[2026-03-20T15:14:01.438] error: Detected 1 oom_kill event in StepId=50293882.0. Some of the step tasks have been OOM Killed.
+srun: error: nid006014: task 0: Out Of Memory
+srun: Terminating StepId=50293882.0

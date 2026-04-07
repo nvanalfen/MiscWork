@@ -2,3 +2,8 @@
 skysim_realign/.ipynb_checkpoints/
 */modular_alignments/
 */__pycache__/
+*/.ipynb_checkpoints/
+*.npz
+*.npy
+*.h5
+*.pdf

@@ -149,14 +149,14 @@ cat = gcrc.load_catalog(cat_name,config_overwrite={'mpi_rank': rank, 'mpi_size':
 # Read catalog using filters
 # Filter thresholds
 REDSHIFT_BLOCK = 0
-REDSHIFT_MIN = 0.8
-REDSHIFT_MAX = 0.81
+REDSHIFT_MIN = 0.0
+REDSHIFT_MAX = 3.0
 # DEC_MIN = -36.61
 # DEC_MAX = 0.0
 # RA_MIN = 0.0
 # RA_MAX = 20.0
 MAG_R_UPPER = 24.5
-MASS_THRESH = 1.846e13
+MASS_THRESH = 1.846e12
 DOWNSAMPLE_FRAC = 1.0                # Downsample if desired [0,1]
 
 # If args were passed, use them
@@ -197,11 +197,12 @@ else:
                     ]
     
     native_filters = [f'redshift_block_lower <= {REDSHIFT_BLOCK}']
+    native_filters = []
     # Only filter on redshift for memory sake. I want the full catalog
     filters = [f"redshiftHubble >= {REDSHIFT_MIN}",f"redshiftHubble < {REDSHIFT_MAX}",
               # f"dec_true > {DEC_MIN}", f"dec_true < {DEC_MAX}",
               # f"ra_true > {RA_MIN}", f"ra_true < {RA_MAX}",
-              #f"mag_true_r_lsst < {MAG_R_UPPER}",
+              f"mag_true_r_lsst < {MAG_R_UPPER}",
               #"baseDC2/target_halo_mass > 1.846e13",
                ]
     catalog_data = cat.get_quantities( table_columns, filters=filters, native_filters = native_filters )
@@ -231,8 +232,7 @@ else:
         # data = data[inds]
         # print("Post-Downsampling:\t",len(data), flush=True)
     
-        print("Length: ", len(data), flush=True)
-        
+        print("Length: ", len(data), flush=True)        
         
         # if len(data) > 15_000_000:
         #     print("Over 15M galaxies. Don't save.", flush=True)
